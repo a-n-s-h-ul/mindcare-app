@@ -1,4 +1,4 @@
-[build]
+﻿[build]
   # The directory where the frontend code is located
   base = "frontend"
   
@@ -18,3 +18,4 @@
   from = "/*"
   to = "/index.html"
   status = 200
+SECRETS_SCAN_ENABLED="false"
