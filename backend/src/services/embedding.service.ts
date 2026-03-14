@@ -10,7 +10,7 @@ import pool from '../db/pool';
 
 // Configuration
 const EMBEDDING_MODEL = process.env.RAG_EMBEDDING_MODEL || 'text-embedding-004';
-const EMBEDDING_DIMENSIONS = 3072; // Gemini embedding-001 dimension
+const EMBEDDING_DIMENSIONS = 768; // Gemini native dimension (fits pgvector HNSW limits)
 
 // Initialize Gemini client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
