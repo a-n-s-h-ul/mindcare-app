@@ -1,15 +1,15 @@
 [build.environment]
-  SECRETS_SCAN_ENABLED = ""false""
+  SECRETS_SCAN_ENABLED = "false"
 
 [build]
-  base = ""frontend""
-  command = ""npm run build""
-  publish = "".next""
+  base = "frontend"
+  command = "npm run build"
+  publish = ".next"
 
 [[plugins]]
-  package = ""@netlify/plugin-nextjs""
+  package = "@netlify/plugin-nextjs"
 
 [[redirects]]
-  from = ""/*""
-  to = ""/index.html""
+  from = "/*"
+  to = "/index.html"
   status = 200
