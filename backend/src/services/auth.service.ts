@@ -141,7 +141,7 @@ export class AuthService {
 
         return {
             message: 'OTP sent successfully',
-            devOtp: (env.NODE_ENV === 'development' && (!env.EMAIL_USER || !env.EMAIL_APP_PASSWORD)) ? otp : undefined // Only return in dev if email isn't configured
+            devOtp: (!env.EMAIL_USER || !env.EMAIL_APP_PASSWORD) ? otp : undefined 
         };
     }
 
