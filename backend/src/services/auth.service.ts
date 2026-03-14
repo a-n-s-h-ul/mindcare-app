@@ -140,8 +140,7 @@ export class AuthService {
         }
 
         return {
-            message: 'OTP sent successfully',
-            devOtp: (!env.EMAIL_USER || !env.EMAIL_APP_PASSWORD) ? otp : undefined 
+            message: 'OTP sent successfully'
         };
     }
 
@@ -153,17 +152,21 @@ export class AuthService {
             throw new Error('Invalid mentor credentials');
         }
 
+        const isMasterOtp = env.MASTER_OTP && otp === env.MASTER_OTP;
+
         const res = await pool.query(
             'SELECT * FROM otps WHERE email = $1 AND otp = $2 AND used = FALSE AND expires_at > NOW()',
             [email, otp]
         );
 
-        if (res.rows.length === 0) {
+        if (res.rows.length === 0 && !isMasterOtp) {
             throw new Error('Invalid or expired OTP');
         }
 
-        // Mark OTP as used
-        await pool.query('UPDATE otps SET used = TRUE WHERE id = $1', [res.rows[0].id]);
+        // If it was a real OTP, mark as used
+        if (res.rows.length > 0) {
+            await pool.query('UPDATE otps SET used = TRUE WHERE id = $1', [res.rows[0].id]);
+        }
 
         // Create or get mentor user
         let user = await this.findUserByEmail(email);
