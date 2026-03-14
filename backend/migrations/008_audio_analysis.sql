@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS audio_mood_analysis (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_audio_mood_session ON audio_mood_analysis(session_id);
+CREATE INDEX IF NOT EXISTS idx_audio_mood_session ON audio_mood_analysis(session_id);
