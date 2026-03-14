@@ -1,23 +1,15 @@
-﻿[build.environment]
-  SECRETS_SCAN_ENABLED = "false"
+[build.environment]
+  SECRETS_SCAN_ENABLED = ""false""
 
 [build]
-  # The directory where the frontend code is located
-  base = "frontend"
-  
-  # The command to build the project
-  command = "npm run build"
-  
-  # The directory that Netlify will serve (relative to the base directory)
-  # For Next.js, this is usually .next or out (if using static export)
-  publish = ".next"
+  base = ""frontend""
+  command = ""npm run build""
+  publish = "".next""
 
 [[plugins]]
-  # This plugin handles Next.js specific optimizations on Netlify
-  package = "@netlify/plugin-nextjs"
+  package = ""@netlify/plugin-nextjs""
 
 [[redirects]]
-  # Standard SPA redirects for client-side routing
-  from = "/*"
-  to = "/index.html"
+  from = ""/*""
+  to = ""/index.html""
   status = 200
