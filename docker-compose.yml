@@ -1,0 +1,93 @@
+# Docker Compose for KIIT Mental Health System
+version: '3.9'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: kiit-mh-postgres
+    environment:
+      POSTGRES_USER: ${DB_USER:-kiit_admin}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secure-password-change-in-prod}
+      POSTGRES_DB: ${DB_NAME:-kiit_mental_health}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/migrations:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-kiit_admin}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kiit-network
+
+  # Backend (Express.js)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kiit-mh-backend
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      PORT: 3001
+      DATABASE_URL: postgresql://${DB_USER:-kiit_admin}:${DB_PASSWORD:-secure-password}@postgres:5432/${DB_NAME:-kiit_mental_health}
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-in-prod}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-your-32-char-encryption-key-here}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/node_modules:/app/node_modules
+    networks:
+      - kiit-network
+    command: npm run dev
+
+  # Frontend (Next.js)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: kiit-mh-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3001}
+      NEXT_PUBLIC_CRISIS_HOTLINE: ${NEXT_PUBLIC_CRISIS_HOTLINE:-9820466726}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/app:/app/app
+      - ./frontend/components:/app/components
+      - ./frontend/node_modules:/app/node_modules
+    networks:
+      - kiit-network
+    command: npm run dev
+
+  # Nginx Reverse Proxy (Optional - for production)
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: kiit-mh-nginx
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./docker/nginx.conf:/etc/nginx/nginx.conf
+  #     - ./docker/ssl:/etc/nginx/ssl
+  #   depends_on:
+  #     - frontend
+  #     - backend
+  #   networks:
+  #     - kiit-network
+
+volumes:
+  postgres_data:
+
+networks:
+  kiit-network:
+    driver: bridge

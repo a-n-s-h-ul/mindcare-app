@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+  </defs>
+  <!-- Brain-Heart hybrid icon -->
+  <path d="M32 56 C32 56 8 40 8 24 C8 14 16 8 24 8 C28 8 31 10 32 13 C33 10 36 8 40 8 C48 8 56 14 56 24 C56 40 32 56 32 56Z" fill="url(#g)"/>
+  <!-- Brain detail lines -->
+  <path d="M32 18 C32 18 28 22 28 28 C28 34 32 36 32 36" stroke="white" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.9"/>
+  <path d="M32 18 C32 18 36 22 36 28 C36 34 32 36 32 36" stroke="white" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.9"/>
+  <path d="M24 24 C26 24 28 26 28 28" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.7"/>
+  <path d="M40 24 C38 24 36 26 36 28" stroke="white" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.7"/>
+</svg>
