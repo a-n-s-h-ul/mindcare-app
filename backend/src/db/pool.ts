@@ -1,13 +1,21 @@
 import { Pool } from 'pg';
 import { env } from '../config/env';
 
-const pool = new Pool({
-    host: env.DB_HOST,
-    port: parseInt(String(env.DB_PORT || '5432')),
-    user: env.DB_USER,
-    password: env.DB_PASSWORD || '',
-    database: env.DB_NAME,
-});
+const poolConfig = env.DATABASE_URL
+    ? {
+        connectionString: env.DATABASE_URL,
+        ssl: env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+    }
+    : {
+        host: env.DB_HOST,
+        port: parseInt(String(env.DB_PORT || '5432')),
+        user: env.DB_USER,
+        password: env.DB_PASSWORD || '',
+        database: env.DB_NAME,
+        ssl: env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+    };
+
+const pool = new Pool(poolConfig);
 
 // Test connection
 pool.on('connect', () => {

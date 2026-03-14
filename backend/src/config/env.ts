@@ -9,7 +9,7 @@ const envSchema = z.object({
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
 
     // Database
-    // Database
+    DATABASE_URL: z.string().optional(),
     DB_AUTH_MODE: z.enum(['trust', 'password']).optional().default('trust'),
     DB_HOST: z.string().optional(),
     DB_PORT: z.string().default('5432').transform(Number),
