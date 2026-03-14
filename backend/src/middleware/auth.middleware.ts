@@ -18,6 +18,15 @@ interface AuthRequest extends Request {
 export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
 
+    if (env.BYPASS_AUTH === 'true') {
+        req.user = {
+            id: '00000000-0000-0000-0000-000000000000',
+            email: 'tester@kiit.ac.in',
+            role: req.headers['x-role'] as string || 'student'
+        };
+        return next();
+    }
+
     if (!authHeader?.startsWith('Bearer ')) {
         return res.status(401).json({ error: 'Unauthorized: No token provided' });
     }

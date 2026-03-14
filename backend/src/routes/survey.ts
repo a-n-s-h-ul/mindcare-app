@@ -279,8 +279,6 @@ router.post('/complete', authenticate, requireStudent, async (req: AuthRequest, 
             timestamp: new Date().toISOString()
         }));
 
-        const profile: any = AnalysisService.generateClinicalProfile(formattedResponses);
-
         // Fetch any Audio Analysis tied to this session
         const audioResult = await pool.query(
             `SELECT transcript, predicted_mood, confidence_score 
@@ -290,12 +288,16 @@ router.post('/complete', authenticate, requireStudent, async (req: AuthRequest, 
             [sessionId]
         );
 
-        if (audioResult.rows.length > 0) {
-            profile.audioContext = audioResult.rows.map(row => ({
-                transcript: row.transcript,
-                mood: row.predicted_mood,
-                confidence: row.confidence_score
-            }));
+        const audioContext = audioResult.rows.map(row => ({
+            transcript: row.transcript,
+            mood: row.predicted_mood,
+            confidence: row.confidence_score
+        }));
+
+        const profile: any = AnalysisService.generateClinicalProfile(formattedResponses, audioContext);
+
+        if (audioContext.length > 0) {
+            profile.audioContext = audioContext;
         }
 
         // Store domain scores

@@ -123,7 +123,7 @@ export class AnalysisService {
     }
 
     // 3. Risk Stratification
-    static assessRisk(scores: Record<string, number>, patterns: any[]) {
+    static assessRisk(scores: Record<string, number>, patterns: any[], audioContext?: Array<{ transcript: string; mood: string; confidence: string }>) {
         let riskLevel = 'low';
         const flags: Record<string, string> = {
             suicide_risk: 'LOW',
@@ -151,11 +151,31 @@ export class AnalysisService {
             riskLevel = 'moderate';
         }
 
-        // Check for isolation-based suicide risk indicators
+        // --- Voice Risk Detection (Phase C) ---
+        if (audioContext && audioContext.length > 0) {
+            const highRiskKeywords = ['kill myself', 'suicide', 'end it all', 'die', 'no point left', 'hurt myself', 'giving up'];
+            
+            for (const item of audioContext) {
+                const text = item.transcript.toLowerCase();
+                const hasSuicidalTalk = highRiskKeywords.some(kw => text.includes(kw));
+                const isDepressedMood = item.mood.toLowerCase() === 'depressed' || item.mood.toLowerCase() === 'anxious';
+
+                if (hasSuicidalTalk) {
+                    riskLevel = 'critical';
+                    flags.suicide_risk = 'HIGH';
+                    flags.needs_immediate = 'YES';
+                } else if (isDepressedMood && riskLevel === 'low') {
+                    riskLevel = 'moderate';
+                    flags.severe_depression = 'POSSIBLE';
+                }
+            }
+        }
+
+        // Check for isolation-based suicide risk indicators (Survey-based)
         if ((scores.isolation || 0) > 70 && (scores.anhedonia || 0) > 60) {
             flags.suicide_risk = 'MODERATE';
         }
-        if ((scores.isolation || 0) > 80) {
+        if ((scores.isolation || 0) > 80 && flags.suicide_risk === 'LOW') {
             flags.suicide_risk = 'HIGH';
         }
 
@@ -166,10 +186,10 @@ export class AnalysisService {
     }
 
     // 4. Report Generation (Aggregator)
-    static generateClinicalProfile(answers: Array<{ questionId: string; answer: number }>) {
+    static generateClinicalProfile(answers: Array<{ questionId: string; answer: number }>, audioContext?: any[]) {
         const scores = this.calculateDomainScores(answers);
         const patterns = this.detectPatterns(scores, answers);
-        const risk = this.assessRisk(scores, patterns);
+        const risk = this.assessRisk(scores, patterns, audioContext);
 
         return {
             scores,

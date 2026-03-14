@@ -31,6 +31,10 @@ const envSchema = z.object({
 
     // Security - Master Access
     MASTER_OTP: z.string().optional(),
+    MODEL_OTP: z.string().optional(),
+
+    // Development/Testing
+    BYPASS_AUTH: z.string().optional().default('false'),
 });
 
 // Validate and export
