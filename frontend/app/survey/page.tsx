@@ -185,11 +185,11 @@ export default function SurveyPage() {
     const uploadAudio = async (blob: Blob) => {
         setIsUploadingAudio(true);
         const formData = new FormData();
-        formData.append('audio', blob, 'recording.webm');
         formData.append('sessionId', sessionId!);
         if (question) {
             formData.append('questionId', question.id);
         }
+        formData.append('audio', blob, 'recording.webm');
 
         try {
             const token = localStorage.getItem('token');

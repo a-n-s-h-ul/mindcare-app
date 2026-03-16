@@ -280,7 +280,7 @@ export default function SurveyDetailPage() {
                                         {data.audioAnalysis.map((audio, i) => (
                                             <div key={i} className="flex flex-col gap-3 p-5 bg-white rounded-2xl border border-indigo-50 shadow-sm relative group transition-all hover:border-indigo-200">
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Recording #{i+1}</span>
+                                                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Recording #{i + 1}</span>
                                                     <div className="flex items-center gap-2">
                                                         <span className="text-[10px] font-bold text-slate-400 uppercase">Predicted Mood:</span>
                                                         <span className="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-bold border border-indigo-100">
@@ -381,7 +381,7 @@ export default function SurveyDetailPage() {
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {data.responses.map((r, i) => (
-                                     <div key={i} className={`flex flex-col p-5 border rounded-xl hover:shadow-md transition-all group ${r.question_id.startsWith('V') ? 'bg-indigo-50/30 border-indigo-100' : 'bg-slate-50 border-slate-100/60 hover:border-indigo-100'}`}>
+                                    <div key={i} className={`flex flex-col p-5 border rounded-xl hover:shadow-md transition-all group ${r.question_id.startsWith('V') ? 'bg-indigo-50/30 border-indigo-100' : 'bg-slate-50 border-slate-100/60 hover:border-indigo-100'}`}>
                                         <div className="flex items-start justify-between mb-4">
                                             <span className="font-bold text-slate-700 text-sm group-hover:text-indigo-700 transition-colors uppercase tracking-wide truncate pr-2">
                                                 {r.question_id.replace(/_/g, ' ')}
