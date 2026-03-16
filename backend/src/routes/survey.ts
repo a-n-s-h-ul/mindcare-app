@@ -199,25 +199,39 @@ router.post('/audio', authenticate, requireStudent, upload.single('audio'), asyn
         ]);
 
         const responseText = result.response.text();
+        logger.debug(`Gemini Raw Response for session ${sessionId}: ${responseText}`);
 
         // Output from Gemini usually contains markdown json blocks
         let analysis;
         try {
-            const cleanJson = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
+            // More robust JSON extraction - find the first { and last }
+            const jsonStart = responseText.indexOf('{');
+            const jsonEnd = responseText.lastIndexOf('}');
+            const cleanJson = (jsonStart !== -1 && jsonEnd !== -1) 
+                ? responseText.substring(jsonStart, jsonEnd + 1) 
+                : responseText;
             analysis = JSON.parse(cleanJson);
         } catch (e) {
-            logger.error("Failed to parse Gemini audio analysis JSON", e);
-            return res.status(500).json({ error: "Failed to parse audio analysis" });
+            logger.warn(`Failed to parse Gemini audio analysis JSON for session ${sessionId}. Response was: ${responseText}`);
+            // Fallback analysis if JSON parsing fails
+            analysis = {
+                transcript: responseText || "Transcription failed (raw text unavailable)",
+                predicted_mood: "Indeterminate",
+                confidence: "Low"
+            };
         }
 
         // Store result in database
-        await pool.query(
-            `INSERT INTO audio_mood_analysis (session_id, question_id, transcript, predicted_mood, confidence_score) 
-             VALUES ($1, $2, $3, $4, $5)`,
-            [sessionId, questionId || null, analysis.transcript, analysis.predicted_mood, analysis.confidence]
-        );
-
-        logger.info(`Audio analysis complete for session ${sessionId}: Mood = ${analysis.predicted_mood}`);
+        try {
+            await pool.query(
+                `INSERT INTO audio_mood_analysis (session_id, question_id, transcript, predicted_mood, confidence_score) 
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [sessionId, questionId || null, analysis.transcript, analysis.predicted_mood, analysis.confidence || 'Medium']
+            );
+            logger.info(`Audio analysis saved to DB for session ${sessionId} (Question: ${questionId})`);
+        } catch (dbErr) {
+            logger.error(`Database error saving audio analysis for session ${sessionId}:`, dbErr);
+        }
 
         res.json({
             success: true,
