@@ -260,7 +260,10 @@ REASONING RULES:
 6. If reliability is low, reduce certainty and emphasize uncertainty.
 7. If reliability is high, interpretations may be more confident.
 8. Risk flags indicate areas needing attention but are not diagnoses.
-9. When trends and reliability conflict, prefer caution and uncertainty.
+9. CROSS-MODAL CORRELATION: Explicitly compare the 'audio_analysis' (tone, transcript, observations) with 'domain_scores'. 
+   - If audio tone (e.g., 'Anxious') conflicts with low domain scores, suggest potential under-reporting.
+   - If transcript content adds depth to specific clusters, highlight the spoken evidence.
+10. When trends and reliability conflict, prefer caution and uncertainty.
 
 OUTPUT REQUIREMENTS:
 

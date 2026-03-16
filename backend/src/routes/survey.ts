@@ -173,16 +173,18 @@ router.post('/audio', authenticate, requireStudent, upload.single('audio'), asyn
         const prompt = `
         You are a clinical AI assistant analyzing a voice recording from a student answering a mental health questionnaire.
         
-        Please listen to this audio and provide:
-        1. A transcript of what the student said.
-        2. A predicted primary mood or emotional state based on their tone of voice, pacing, and words (e.g., Anxious, Depressed, Elevated, Calm, Stressed). Keep this to 1-2 words.
-        3. A confidence score for your mood prediction (Low, Medium, High).
+        Analyze the audio for:
+        1. A full, verbatim transcript of what the student said.
+        2. Emotional state based on tone, pitch, pacing, and verbal content (e.g., Anxious, Flat Affect, Rapid/Pressured Speech, Depressed, Calm). Keep the predicted_mood to 1-2 words.
+        3. Clinical observations: Does the pacing match the content? Are there long pauses indicating hesitation or cognitive load? 
+        4. A confidence score for your prediction (Low, Medium, High).
         
-        Return ONLY a JSON object with this exact structure:
+        Return ONLY a JSON object with this structure:
         {
           "transcript": "string",
           "predicted_mood": "string",
-          "confidence": "string"
+          "confidence": "string",
+          "observations": ["string"]
         }
         `;
 

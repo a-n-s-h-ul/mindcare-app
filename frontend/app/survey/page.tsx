@@ -170,6 +170,12 @@ export default function SurveyPage() {
     };
 
     const stopRecording = () => {
+        // Enforce 15s minimum recording duration (30 - 15 = 15s elapsed)
+        if (recordingTimer > 15 && question?.type === 'voice_recording') {
+            alert(`Please speak for at least ${15 - (30 - recordingTimer)} more seconds.`);
+            return;
+        }
+
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop();
             setIsRecording(false);
@@ -240,19 +246,24 @@ export default function SurveyPage() {
                 }, 1000);
             } else if (!hasPrepped && prepTimer === 0) {
                 setHasPrepped(true);
-            } else if (hasPrepped && isRecording && recordingTimer > 0) {
-                // Countdown for recording
+                // AUTO START: Start recording automatically after reading time
+                startRecording();
+            } else if (hasPrepped && isRecording) {
                 interval = setInterval(() => {
-                    setRecordingTimer(prev => prev - 1);
+                    setRecordingTimer(prev => {
+                        if (prev <= 1) {
+                            // Auto stop at max 30s
+                            stopRecording();
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
                 }, 1000);
-            } else if (hasPrepped && isRecording && recordingTimer === 0) {
-                // Auto stop at 30s
-                stopRecording();
             }
         }
 
         return () => clearInterval(interval);
-    }, [question, prepTimer, hasPrepped, isRecording, recordingTimer]);
+    }, [question, prepTimer, hasPrepped, isRecording]);
 
     if (loading) {
         return (

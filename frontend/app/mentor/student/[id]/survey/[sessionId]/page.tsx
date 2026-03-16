@@ -18,6 +18,13 @@ interface SessionDetail {
         overallRisk: string;
     };
     responses: Array<{ question_id: string; answer: number; created_at: string }>;
+    audioAnalysis?: Array<{
+        question_id?: string;
+        transcript: string;
+        predicted_mood: string;
+        confidence_score: string;
+        observations?: string[];
+    }>;
     ragAnalysis: {
         reasoning: any;
         report: any;
@@ -258,6 +265,55 @@ export default function SurveyDetailPage() {
                                 </div>
                             </Card>
 
+                            {/* Voice Analysis Signal Group (Phase C Enhancement) */}
+                            {data.audioAnalysis && data.audioAnalysis.length > 0 && (
+                                <Card className="p-8 border-indigo-100 bg-gradient-to-br from-white to-indigo-50/30">
+                                    <h2 className="text-lg font-bold text-slate-800 mb-6 uppercase tracking-wider flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center text-indigo-600">
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                            </svg>
+                                        </div>
+                                        Clinical Voice Artifacts
+                                    </h2>
+                                    <div className="space-y-4">
+                                        {data.audioAnalysis.map((audio, i) => (
+                                            <div key={i} className="flex flex-col gap-3 p-5 bg-white rounded-2xl border border-indigo-50 shadow-sm relative group transition-all hover:border-indigo-200">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Recording #{i+1}</span>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] font-bold text-slate-400 uppercase">Predicted Mood:</span>
+                                                        <span className="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[10px] font-bold border border-indigo-100">
+                                                            {audio.predicted_mood.toUpperCase()}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <p className="text-[15px] italic text-slate-700 leading-relaxed font-medium">"{audio.transcript}"</p>
+                                                {audio.observations && audio.observations.length > 0 && (
+                                                    <div className="mt-2 pt-3 border-t border-slate-50">
+                                                        <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider mb-2 block">AI Observables</span>
+                                                        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                            {audio.observations.map((obs, idx) => (
+                                                                <li key={idx} className="flex items-center gap-2 text-xs text-slate-500 font-medium">
+                                                                    <div className="w-1 h-1 rounded-full bg-indigo-300" />
+                                                                    {obs}
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="mt-6 p-4 bg-amber-50/50 rounded-xl border border-amber-100/50 flex items-start gap-4">
+                                        <span className="text-xl">💡</span>
+                                        <p className="text-xs text-amber-900 font-medium leading-relaxed">
+                                            <strong>Cross-Modal Tip:</strong> Compare these spoken notes with the MCQ scores above. Significant discrepancies between a "Calm" tone and "Elevated" scores (or vice-versa) can provide critical context for follow-up.
+                                        </p>
+                                    </div>
+                                </Card>
+                            )}
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Risk Flags */}
                                 <Card className="p-8">
@@ -325,31 +381,62 @@ export default function SurveyDetailPage() {
                             </h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {data.responses.map((r, i) => (
-                                    <div key={i} className="flex flex-col p-5 bg-slate-50 border border-slate-100/60 rounded-xl hover:shadow-md hover:border-indigo-100 transition-all group">
+                                     <div key={i} className={`flex flex-col p-5 border rounded-xl hover:shadow-md transition-all group ${r.question_id.startsWith('V') ? 'bg-indigo-50/30 border-indigo-100' : 'bg-slate-50 border-slate-100/60 hover:border-indigo-100'}`}>
                                         <div className="flex items-start justify-between mb-4">
-                                            <span className="font-bold text-slate-700 text-sm group-hover:text-indigo-700 transition-colors uppercase tracking-wide truncate pr-2">{r.question_id.replace(/_/g, ' ')}</span>
-                                        </div>
-                                        <div className="flex items-end justify-between mt-auto pt-2 border-t border-slate-200/50">
-                                            <span className="text-xs font-semibold text-slate-400">
-                                                {new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            <span className="font-bold text-slate-700 text-sm group-hover:text-indigo-700 transition-colors uppercase tracking-wide truncate pr-2">
+                                                {r.question_id.replace(/_/g, ' ')}
+                                                {r.question_id.startsWith('V') && <Badge className="ml-2 text-[8px] bg-indigo-100 text-indigo-700 border-indigo-200">VOICE</Badge>}
                                             </span>
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex gap-1">
-                                                    {[0, 1, 2, 3].map(val => (
-                                                        <div
-                                                            key={val}
-                                                            className={`w-2.5 h-2.5 rounded-full transition-colors ${val <= r.answer
-                                                                ? r.answer >= 2 ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
-                                                                : 'bg-slate-200'
-                                                                }`}
-                                                        />
-                                                    ))}
-                                                </div>
-                                                <span className={`font-extrabold text-lg leading-none ${r.answer >= 2 ? 'text-rose-600' : 'text-emerald-600'}`}>
-                                                    {r.answer}
-                                                </span>
-                                            </div>
                                         </div>
+
+                                        {r.question_id.startsWith('V') ? (
+                                            <div className="mt-auto">
+                                                {(() => {
+                                                    const analysis = data.audioAnalysis?.find(a => a.question_id === r.question_id);
+                                                    return analysis ? (
+                                                        <div className="space-y-1">
+                                                            <div className="flex items-center gap-1.5">
+                                                                <span className="text-[10px] font-bold text-slate-400 uppercase">Mood:</span>
+                                                                <span className="text-[10px] font-bold text-indigo-600 uppercase">{analysis.predicted_mood}</span>
+                                                            </div>
+                                                            <p className="text-xs text-slate-500 italic line-clamp-2 leading-relaxed">"{analysis.transcript.substring(0, 60)}..."</p>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2 text-slate-400">
+                                                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+                                                            <span className="text-[10px] font-medium italic">Processing Voice...</span>
+                                                        </div>
+                                                    );
+                                                })()}
+                                                <div className="flex items-center justify-between mt-3 pt-2 border-t border-indigo-100/50">
+                                                    <span className="text-[10px] font-semibold text-slate-400">
+                                                        {new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-end justify-between mt-auto pt-2 border-t border-slate-200/50">
+                                                <span className="text-xs font-semibold text-slate-400">
+                                                    {new Date(r.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex gap-1">
+                                                        {[0, 1, 2, 3].map(val => (
+                                                            <div
+                                                                key={val}
+                                                                className={`w-2.5 h-2.5 rounded-full transition-colors ${val <= r.answer
+                                                                    ? r.answer >= 2 ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' : 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
+                                                                    : 'bg-slate-200'
+                                                                    }`}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                    <span className={`font-extrabold text-lg leading-none ${r.answer >= 2 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                                                        {r.answer}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>

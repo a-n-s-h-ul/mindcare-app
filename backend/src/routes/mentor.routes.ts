@@ -225,6 +225,12 @@ router.get('/student/:id/session/:sessionId', authenticate, requireMentor, async
             [sessionId]
         );
 
+        // Get audio analysis for this session
+        const audioResult = await pool.query(
+            'SELECT question_id, transcript, predicted_mood, confidence_score FROM audio_mood_analysis WHERE session_id = $1 ORDER BY created_at ASC',
+            [sessionId]
+        );
+
         // Get RAG context if exists
         let ragContext = null;
         if (session.result_id) {
@@ -253,6 +259,7 @@ router.get('/student/:id/session/:sessionId', authenticate, requireMentor, async
                 overallRisk: session.overall_risk || 'not_assessed'
             },
             responses: answersResult.rows,
+            audioAnalysis: audioResult.rows,
             ragAnalysis: ragContext
         });
     } catch (err: any) {

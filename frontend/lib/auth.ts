@@ -54,6 +54,14 @@ export const authApi = {
      * Get current user info
      */
     getMe: async () => {
+        if (process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true') {
+            return {
+                id: '00000000-0000-0000-0000-000000000000',
+                email: 'tester@kiit.ac.in',
+                role: 'student'
+            };
+        }
+
         const token = localStorage.getItem('token');
         if (!token) return null;
 
@@ -70,7 +78,7 @@ export const authApi = {
      */
     logout: async () => {
         const token = localStorage.getItem('token');
-        if (token) {
+        if (token && process.env.NEXT_PUBLIC_BYPASS_AUTH !== 'true') {
             await fetch(`${API_URL}/auth/logout`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
@@ -83,12 +91,22 @@ export const authApi = {
     /**
      * Get stored token
      */
-    getToken: () => localStorage.getItem('token'),
+    getToken: () => {
+        if (process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true') return 'mock-token';
+        return localStorage.getItem('token');
+    },
 
     /**
      * Get stored user
      */
     getUser: () => {
+        if (process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true') {
+            return {
+                id: '00000000-0000-0000-0000-000000000000',
+                email: 'tester@kiit.ac.in',
+                role: 'student'
+            };
+        }
         const user = localStorage.getItem('user');
         return user ? JSON.parse(user) : null;
     },
@@ -96,7 +114,10 @@ export const authApi = {
     /**
      * Check if authenticated
      */
-    isAuthenticated: () => !!localStorage.getItem('token'),
+    isAuthenticated: () => {
+        if (process.env.NEXT_PUBLIC_BYPASS_AUTH === 'true') return true;
+        return !!localStorage.getItem('token');
+    },
 
     /**
      * Check if user is mentor
